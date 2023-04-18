@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: sreeharshav/testcontainer:v1
+          ports:
+            - containerPort: 80
+          readinessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeourSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 80
+          livenessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 5
+            timeourSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+            httpGet:
+              path: /
+              port: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-deployment
+  labels:
+    app: nginx
+spec:
+  selector:
+    app: nginx
+    type: LoadBalancer
+  ports:
+    - name: nginx-port
+      port: 8000
+      targetPort: 80
+---
+
